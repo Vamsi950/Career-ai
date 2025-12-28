@@ -69,6 +69,7 @@ npm start
 ### Resumes
 
 - `POST /api/v1/resumes` - Upload and analyze resume
+- `POST /api/v1/resumes/:id/improve` - Generate AI-improved resume content
 - `GET /api/v1/resumes` - Get all resumes for current user
 - `GET /api/v1/resumes/:id` - Get single resume
 - `DELETE /api/v1/resumes/:id` - Delete resume

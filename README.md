@@ -19,6 +19,8 @@ The platform doesn't just scan for keywords; it understands context, identifies 
 - **Visual Progress**: Real-time progress tracking during the AI intense analysis phase.
 
 ### 📄 Document & View Features
+- **AI-Powered Resume Transformation**: Rewrites your resume from scratch using elite career coach prompts to maximize impact and metric-driven achievements.
+- **Professional LaTeX-Style Export**: Download your improved resume as a high-end, professionally formatted PDF inspired by elite LaTeX templates.
 - **Multi-Format Support**: Full support for PDF and DOCX uploads (up to 5MB).
 - **View Original Resume**: Ability to view and open the original uploaded file directly from the analysis report.
 - **Step-by-Step Improvement Plan**: Actionable, numbered suggestions to make your resume "market-ready."
