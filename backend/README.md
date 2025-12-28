@@ -1,16 +1,15 @@
-# Resume Analyzer - Backend
+# CareerAI — Backend Service
 
-A powerful backend service for analyzing resumes using AI. This service provides RESTful APIs for user authentication, file uploads, and AI-powered resume analysis.
+A high-performance, secure backend service for parsing and analyzing resumes using advanced Large Language Models (LLMs). This service provides the core AI logic, secure file handling, and RESTful API endpoints for the CareerAI platform.
 
-## Features
+## 🚀 Key Features
 
-- User authentication with JWT
-- File upload support (PDF/DOCX)
-- Resume text extraction
-- AI-powered resume analysis
-- RESTful API endpoints
-- Secure file handling
-- Error handling and validation
+- **Multi-Model AI Analysis**: Integrated with Groq Cloud (Llama 3) for primary analysis and OpenAI (GPT-4) as a robust fallback.
+- **Advanced Text Extraction**: High-accuracy text extraction from PDF and DOCX formats.
+- **ATS Scoring Engine**: A proprietary logic for evaluating resume-to-JD compatibility.
+- **Scaleable File Handling**: Secure upload management with Multer and static serving for resume viewing.
+- **JWT-Based Security**: Complete authentication and authorization flow using JSON Web Tokens.
+- **RESTful API Architecture**: Clean, structured, and predictable API endpoints.
 
 ## Prerequisites
 

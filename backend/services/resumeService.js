@@ -21,12 +21,14 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 // Extract text from PDF
 const extractTextFromPdf = async (filePath) => {
   try {
+    console.log('Attempting to extract text from PDF:', filePath);
     const dataBuffer = await fs.readFile(filePath);
     const data = await pdf(dataBuffer);
+    console.log('Text extraction successful');
     return data.text;
   } catch (error) {
-    console.error('Error extracting text from PDF:', error);
-    throw new Error('Failed to extract text from PDF');
+    console.error('Detailed error extracting text from PDF:', error);
+    throw new Error(`Failed to extract text from PDF: ${error.message}`);
   }
 };
 
@@ -42,11 +44,11 @@ const extractTextFromDocx = async (filePath) => {
 };
 
 // Analyze resume text with Groq AI (primary - free and fast)
-const analyzeResumeWithAI = async (text) => {
+const analyzeResumeWithAI = async (text, jobDescription = '') => {
   try {
-    const prompt = `Analyze the following resume and provide a detailed analysis in JSON format with the following structure:
+    const prompt = `Analyze the following resume${jobDescription ? ' against the provided Job Description' : ''} and provide a detailed analysis in JSON format with the following structure:
     {
-      "summary": "A brief summary of the resume",
+      "summary": "A brief summary of the resume${jobDescription ? ' and how it fits the role' : ''}",
       "strengths": ["strength1", "strength2", ...],
       "weaknesses": ["weakness1", "weakness2", ...],
       "skills": {
@@ -71,17 +73,20 @@ const analyzeResumeWithAI = async (text) => {
       "improvement_suggestions": ["suggestion1", "suggestion2", ...],
       "missing_keywords": ["keyword1", "keyword2", ...],
       "ats_score": 0-100,
-      "overall_assessment": "Detailed overall assessment"
+      "overall_assessment": "Detailed overall assessment${jobDescription ? ' of fit for the role' : ''}"
     }
+
+    ${jobDescription ? `Job Description:
+    ${jobDescription}
     
-    Resume Text: ${text.substring(0, 10000)}`;
+    ` : ''}Resume Text: ${text.substring(0, 10000)}`;
 
     const response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages: [
         {
           role: "system",
-          content: "You are an expert resume analyzer. Provide detailed, constructive feedback in the specified JSON format. Return ONLY valid JSON, no explanations."
+          content: "You are an expert resume analyzer and ATS optimizer. Provide detailed, constructive feedback in the specified JSON format. Return ONLY valid JSON, no explanations."
         },
         {
           role: "user",
@@ -93,18 +98,18 @@ const analyzeResumeWithAI = async (text) => {
     });
 
     const analysis = response.choices[0].message.content;
-    
+
     // Clean up the response to ensure valid JSON
     let cleanAnalysis = analysis.replace(/```json\n?|\n?```/g, '').trim();
-    
+
     // Try to extract JSON from the response
     const jsonMatch = cleanAnalysis.match(/\{[\s\S]*\}/);
     if (jsonMatch) {
       cleanAnalysis = jsonMatch[0];
     }
-    
+
     const parsedAnalysis = JSON.parse(cleanAnalysis);
-    
+
     // Ensure the response has the expected structure
     return {
       summary: parsedAnalysis.summary || 'Resume analysis completed',
@@ -128,11 +133,11 @@ const analyzeResumeWithAI = async (text) => {
 };
 
 // Fallback to OpenAI if Gemini fails
-const analyzeResumeWithOpenAI = async (text) => {
+const analyzeResumeWithOpenAI = async (text, jobDescription = '') => {
   try {
-    const prompt = `Analyze the following resume and provide a detailed analysis in JSON format with the following structure:
+    const prompt = `Analyze the following resume${jobDescription ? ' against the provided Job Description' : ''} and provide a detailed analysis in JSON format with the following structure:
     {
-      "summary": "A brief summary of the resume",
+      "summary": "A brief summary of the resume${jobDescription ? ' and how it fits the role' : ''}",
       "strengths": ["strength1", "strength2", ...],
       "weaknesses": ["weakness1", "weakness2", ...],
       "skills": {
@@ -157,17 +162,20 @@ const analyzeResumeWithOpenAI = async (text) => {
       "improvement_suggestions": ["suggestion1", "suggestion2", ...],
       "missing_keywords": ["keyword1", "keyword2", ...],
       "ats_score": 0-100,
-      "overall_assessment": "Detailed overall assessment"
+      "overall_assessment": "Detailed overall assessment${jobDescription ? ' of fit for the role' : ''}"
     }
+
+    ${jobDescription ? `Job Description:
+    ${jobDescription}
     
-    Resume Text: ${text.substring(0, 10000)}`;
+    ` : ''}Resume Text: ${text.substring(0, 10000)}`;
 
     const response = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
-          content: "You are an expert resume analyzer. Provide detailed, constructive feedback in the specified JSON format."
+          content: "You are an expert resume analyzer and ATS optimizer. Provide detailed, constructive feedback in the specified JSON format."
         },
         {
           role: "user",
@@ -186,9 +194,83 @@ const analyzeResumeWithOpenAI = async (text) => {
   }
 };
 
+// Improve resume text with AI based on analysis and suggestions
+const improveResumeWithAI = async (text, analysis) => {
+  try {
+    const prompt = `Based on the following resume text and the provided analysis, rewrite the resume into a high-end, professional, and impact-driven version.
+    
+    CRITICAL INSTRUCTION: Your output MUST follow this exact structure using these exact Markdown headers (#):
+    
+    # Summary
+    [A brief, powerful professional summary]
+
+    # Experience
+    [List professional experience. Each entry should have:
+    **Job Title** | Company Name | Location [Right Aligned Concept] | Date Range
+    - Use bullet points (*) with action verbs and metrics.]
+
+    # Projects
+    [List key projects. Each entry should have:
+    **Project Name** | Technologies Used | Link (if any)
+    - Use bullet points (*) for details.]
+
+    # Education
+    [List education in this format:
+    **Institution Name** | Degree/Major | Location | Dates]
+
+    # Technical Skills
+    - **Languages:** [List languages]
+    - **Web/Frameworks:** [List web techs]
+    - **Tools:** [List tools]
+    - **Concepts:** [List core concepts]
+
+    # Certifications
+    - [List certifications with bullet points]
+
+    # Achievements
+    - [List key achievements with bullet points]
+
+    Focus on:
+    1. Using powerful action verbs (e.g., Spearheaded, Orchestrated, Optimized).
+    2. Quantifying achievements (e.g., Improved efficiency by 20%).
+    3. Addressing the "weaknesses" and "improvement_suggestions" identified in the analysis.
+    4. Incorporating relevant "missing_keywords".
+    5. Maintaining a clean, crisp professional tone.
+
+    Analysis: ${JSON.stringify(analysis)}
+    
+    Original Resume Text:
+    ${text.substring(0, 8000)}
+
+    Return ONLY the improved resume content in the specified structured Markdown format. Do not include any pre-amble or post-amble.`;
+
+    const response = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
+      messages: [
+        {
+          role: "system",
+          content: "You are an elite career coach and expert resume writer specialized in LaTeX-style professional formats. Your goal is to rewrite resumes to be world-class and perfectly structured."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      temperature: 0.4,
+      max_tokens: 4000,
+    });
+
+    return response.choices[0].message.content;
+  } catch (error) {
+    console.error('Error improving resume with AI:', error);
+    throw new Error('Failed to improve resume with AI');
+  }
+};
+
 module.exports = {
   extractTextFromPdf,
   extractTextFromDocx,
   analyzeResumeWithAI,
   analyzeResumeWithOpenAI,
+  improveResumeWithAI,
 };

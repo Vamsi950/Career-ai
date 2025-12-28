@@ -2,17 +2,21 @@ import axios from 'axios';
 
 const API_URL = 'http://localhost:5000/api/v1/resumes/';
 
-interface Resume {
+export interface Resume {
   _id: string;
   originalName: string;
   fileName: string;
   fileType: string;
   extractedText: string;
   analysis: ResumeAnalysis;
+  user: {
+    _id: string;
+    email: string;
+  };
   createdAt: string;
 }
 
-interface ResumeAnalysis {
+export interface ResumeAnalysis {
   summary: string;
   strengths: string[];
   weaknesses: string[];
@@ -77,11 +81,18 @@ const deleteResume = async (id: string): Promise<void> => {
   await axios.delete(API_URL + id, getAuthConfig());
 };
 
+// Improve resume with AI
+const improveResume = async (id: string): Promise<string> => {
+  const response = await axios.post(API_URL + id + '/improve', {}, getAuthConfig());
+  return response.data.data;
+};
+
 const resumeService = {
   uploadResume,
   getResumes,
   getResume,
   deleteResume,
+  improveResume,
 };
 
 export default resumeService;

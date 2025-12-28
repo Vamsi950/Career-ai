@@ -52,58 +52,78 @@ const Layout: React.FC = () => {
   ];
 
   const drawer = (
-    <div>
-      <Toolbar sx={{ 
-        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-        color: 'white',
+    <Box sx={{ height: '100%', bgcolor: '#1e293b', color: '#f8fafc' }}>
+      <Toolbar sx={{
+        bgcolor: '#1e293b',
+        color: '#f8fafc',
         display: 'flex',
         alignItems: 'center',
         gap: 2,
+        borderBottom: '1px solid rgba(255,255,255,0.05)'
       }}>
-        <Avatar sx={{ 
-          bgcolor: 'white',
+        <Avatar sx={{
+          background: 'var(--primary-gradient)',
           width: 40,
           height: 40,
         }}>
-          <WorkIcon sx={{ color: '#667eea' }} />
+          <WorkIcon sx={{ color: 'white' }} />
         </Avatar>
         <Typography variant="h6" noWrap component="div" fontWeight="bold">
           CareerAI
         </Typography>
       </Toolbar>
-      <List>
+      <List sx={{ px: 2, py: 2 }}>
         {menuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
+          <ListItem key={item.text} disablePadding sx={{ mb: 1 }}>
             <ListItemButton
               selected={location.pathname === item.path}
               onClick={() => navigate(item.path)}
               sx={{
+                borderRadius: 2,
+                color: 'rgba(248, 250, 252, 0.7)',
                 '&.Mui-selected': {
-                  backgroundColor: 'primary.light',
-                  color: 'primary.main',
+                  backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                  color: '#fff',
                   '& .MuiListItemIcon-root': {
-                    color: 'primary.main',
+                    color: '#fff',
+                  },
+                },
+                '&:hover': {
+                  backgroundColor: 'rgba(255,255,255,0.05)',
+                  color: '#fff',
+                  '& .MuiListItemIcon-root': {
+                    color: '#fff',
                   },
                 },
               }}
             >
-              <ListItemIcon>{item.icon}</ListItemIcon>
-              <ListItemText primary={item.text} />
+              <ListItemIcon sx={{ minWidth: 40, color: 'inherit' }}>{item.icon}</ListItemIcon>
+              <ListItemText
+                primary={item.text}
+                primaryTypographyProps={{
+                  fontWeight: location.pathname === item.path ? 600 : 400,
+                  fontSize: '0.9rem'
+                }}
+              />
             </ListItemButton>
           </ListItem>
         ))}
       </List>
-    </div>
+    </Box>
   );
 
   return (
     <Box sx={{ display: 'flex' }}>
       <AppBar
         position="fixed"
+        elevation={0}
         sx={{
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           ml: { sm: `${drawerWidth}px` },
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          background: 'rgba(255, 255, 255, 0.8)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid rgba(0,0,0,0.05)',
+          color: '#1e293b'
         }}
       >
         <Toolbar>
@@ -117,34 +137,28 @@ const Layout: React.FC = () => {
             <MenuIcon />
           </IconButton>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexGrow: 1 }}>
-            <Avatar sx={{ 
-              bgcolor: 'white',
+            <Avatar sx={{
+              background: 'var(--primary-gradient)',
               width: 36,
               height: 36,
             }}>
-              <WorkIcon sx={{ color: '#667eea', fontSize: 20 }} />
+              <WorkIcon sx={{ color: 'white', fontSize: 20 }} />
             </Avatar>
             <Typography variant="h6" noWrap component="div" fontWeight="bold">
               CareerAI
             </Typography>
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)' }}>
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+              <Typography variant="subtitle2" fontWeight="bold">{user?.name}</Typography>
+              <Typography variant="caption" color="text.secondary">Free Plan</Typography>
+            </Box>
+            <Avatar sx={{ bgcolor: 'rgba(99, 102, 241, 0.1)', color: 'primary.main' }}>
               <PersonIcon />
             </Avatar>
-            <Typography variant="body2">{user?.name}</Typography>
-            <Button 
-              color="inherit" 
-              onClick={handleLogout} 
-              startIcon={<LogoutIcon />}
-              sx={{ 
-                '&:hover': {
-                  backgroundColor: 'rgba(255,255,255,0.1)',
-                }
-              }}
-            >
-              Logout
-            </Button>
+            <IconButton color="inherit" onClick={handleLogout} title="Logout">
+              <LogoutIcon />
+            </IconButton>
           </Box>
         </Toolbar>
       </AppBar>
@@ -171,7 +185,12 @@ const Layout: React.FC = () => {
           variant="permanent"
           sx={{
             display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: drawerWidth,
+              borderRight: 'none',
+              bgcolor: '#1e293b'
+            },
           }}
           open
         >

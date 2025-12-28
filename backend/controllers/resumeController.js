@@ -49,18 +49,20 @@ exports.uploadResume = async (req, res, next) => {
       return next(new ErrorResponse('File type not supported', 400));
     }
 
+    const { jobDescription } = req.body;
+
     // Analyze the extracted text with AI (try Groq first, then Gemini, then OpenAI)
     let analysis;
     try {
       analysis = await withTimeout(
-        resumeService.analyzeResumeWithAI(extractedText),
+        resumeService.analyzeResumeWithAI(extractedText, jobDescription),
         10000
       );
     } catch (groqError) {
       console.log('Groq AI failed, trying Gemini fallback:', groqError.message);
       try {
         analysis = await withTimeout(
-          resumeService.analyzeResumeWithOpenAI(extractedText),
+          resumeService.analyzeResumeWithOpenAI(extractedText, jobDescription),
           15000
         );
       } catch (openaiError) {
@@ -79,6 +81,8 @@ exports.uploadResume = async (req, res, next) => {
       extractedText: extractedText.substring(0, 10000), // Store first 10000 chars
       analysis,
     });
+
+    await resume.populate('user', 'email');
 
     res.status(201).json({
       success: true,
@@ -120,7 +124,7 @@ exports.getResume = async (req, res, next) => {
     const resume = await Resume.findOne({
       _id: req.params.id,
       user: req.user.id,
-    });
+    }).populate('user', 'email');
 
     if (!resume) {
       return next(
@@ -164,6 +168,36 @@ exports.deleteResume = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: {},
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Improve resume with AI
+// @route   POST /api/v1/resumes/:id/improve
+// @access  Private
+exports.improveResume = async (req, res, next) => {
+  try {
+    const resume = await Resume.findOne({
+      _id: req.params.id,
+      user: req.user.id,
+    }).populate('user', 'email');
+
+    if (!resume) {
+      return next(
+        new ErrorResponse(`Resume not found with id of ${req.params.id}`, 404)
+      );
+    }
+
+    const improvedContent = await resumeService.improveResumeWithAI(
+      resume.extractedText,
+      resume.analysis
+    );
+
+    res.status(200).json({
+      success: true,
+      data: improvedContent,
     });
   } catch (error) {
     next(error);

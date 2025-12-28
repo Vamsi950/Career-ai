@@ -1,44 +1,10 @@
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import resumeService from './resumeService';
+import resumeService, { Resume, ResumeAnalysis } from './resumeService';
 
-interface Resume {
-  _id: string;
-  originalName: string;
-  fileName: string;
-  fileType: string;
-  extractedText: string;
-  analysis: ResumeAnalysis;
-  createdAt: string;
-}
-
-interface ResumeAnalysis {
-  summary: string;
-  strengths: string[];
-  weaknesses: string[];
-  skills: {
-    technical: string[];
-    soft: string[];
-  };
-  experience: Array<{
-    title: string;
-    company: string;
-    duration: string;
-    description: string;
-  }>;
-  education: Array<{
-    degree: string;
-    institution: string;
-    year: string;
-  }>;
-  improvement_suggestions: string[];
-  missing_keywords: string[];
-  ats_score: number;
-  overall_assessment: string;
-}
-
-interface ResumeState {
+export interface ResumeState {
   resumes: Resume[];
   currentResume: Resume | null;
+  improvedContent: string | null;
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
@@ -49,12 +15,30 @@ interface ResumeState {
 const initialState: ResumeState = {
   resumes: [],
   currentResume: null,
+  improvedContent: null,
   isLoading: false,
   isSuccess: false,
   isError: false,
   message: '',
   uploadProgress: 0,
 };
+
+// Improve resume
+export const improveResume = createAsyncThunk<
+  string,
+  string,
+  { rejectValue: string }
+>('resume/improve', async (id, thunkAPI) => {
+  try {
+    return await resumeService.improveResume(id);
+  } catch (error: any) {
+    const message =
+      (error.response && error.response.data && error.response.data.message) ||
+      error.message ||
+      error.toString();
+    return thunkAPI.rejectWithValue(message);
+  }
+});
 
 // Upload and analyze resume
 export const uploadResume = createAsyncThunk<
@@ -137,6 +121,7 @@ export const resumeSlice = createSlice({
       state.isError = false;
       state.message = '';
       state.uploadProgress = 0;
+      state.improvedContent = null;
     },
     setUploadProgress: (state, action: PayloadAction<number>) => {
       state.uploadProgress = action.payload;
@@ -144,6 +129,23 @@ export const resumeSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Improve resume
+      .addCase(improveResume.pending, (state) => {
+        state.isLoading = true;
+        state.isSuccess = false;
+        state.isError = false;
+        state.message = '';
+      })
+      .addCase(improveResume.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.improvedContent = action.payload;
+      })
+      .addCase(improveResume.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload || '';
+      })
       // Upload resume
       .addCase(uploadResume.pending, (state) => {
         state.isLoading = true;

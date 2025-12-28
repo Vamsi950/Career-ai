@@ -42,6 +42,7 @@ const Dashboard: React.FC = () => {
   const { resumes, isLoading, isError, message } = useAppSelector(
     (state) => state.resume
   );
+  const { user } = useAppSelector((state) => state.auth);
 
   useEffect(() => {
     dispatch(getResumes());
@@ -75,7 +76,7 @@ const Dashboard: React.FC = () => {
 
   const getStats = () => {
     const totalResumes = resumes.length;
-    const avgATSScore = totalResumes > 0 
+    const avgATSScore = totalResumes > 0
       ? Math.round(resumes.reduce((sum, r) => sum + r.analysis.ats_score, 0) / totalResumes)
       : 0;
     const recentResumes = resumes.filter(r => {
@@ -84,7 +85,7 @@ const Dashboard: React.FC = () => {
       weekAgo.setDate(weekAgo.getDate() - 7);
       return uploadDate > weekAgo;
     }).length;
-    
+
     return { totalResumes, avgATSScore, recentResumes };
   };
 
@@ -101,91 +102,94 @@ const Dashboard: React.FC = () => {
   return (
     <Container maxWidth="lg">
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
-          CareerAI Dashboard
+        <Typography variant="h3" component="h1" gutterBottom fontWeight="bold" sx={{ color: '#0f172a' }}>
+          Welcome back, {user?.name.split(' ')[0]}!
         </Typography>
         <Typography variant="h6" color="text.secondary">
-          Upload and analyze your resumes with AI to improve your job applications
+          Monitor your career progress and optimize your resumes.
         </Typography>
       </Box>
 
       {/* Stats Cards */}
       {resumes.length > 0 && (
-        <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid container spacing={3} sx={{ mb: 6 }}>
           <Grid item xs={12} sm={4}>
-            <Paper 
-              elevation={3}
-              sx={{ 
-                p: 3, 
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                color: 'white',
-                borderRadius: 2
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                bgcolor: 'rgba(99, 102, 241, 0.03)',
+                border: '1px solid rgba(99, 102, 241, 0.1)',
+                borderRadius: 4,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 3
               }}
             >
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Box>
-                  <Typography variant="h4" fontWeight="bold">
-                    {stats.totalResumes}
-                  </Typography>
-                  <Typography variant="body2">
-                    Total Resumes
-                  </Typography>
-                </Box>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
-                  <DescriptionIcon />
-                </Avatar>
+              <Avatar sx={{ bgcolor: 'rgba(99, 102, 241, 0.1)', color: 'primary.main', width: 56, height: 56 }}>
+                <DescriptionIcon />
+              </Avatar>
+              <Box>
+                <Typography variant="h4" fontWeight="bold" color="#0f172a">
+                  {stats.totalResumes}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Total Resumes
+                </Typography>
               </Box>
             </Paper>
           </Grid>
-          
+
           <Grid item xs={12} sm={4}>
-            <Paper 
-              elevation={3}
-              sx={{ 
-                p: 3, 
-                background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-                color: 'white',
-                borderRadius: 2
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                bgcolor: 'rgba(236, 72, 153, 0.03)',
+                border: '1px solid rgba(236, 72, 153, 0.1)',
+                borderRadius: 4,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 3
               }}
             >
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Box>
-                  <Typography variant="h4" fontWeight="bold">
-                    {stats.avgATSScore}%
-                  </Typography>
-                  <Typography variant="body2">
-                    Avg ATS Score
-                  </Typography>
-                </Box>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
-                  <AssessmentIcon />
-                </Avatar>
+              <Avatar sx={{ bgcolor: 'rgba(236, 72, 153, 0.1)', color: 'secondary.main', width: 56, height: 56 }}>
+                <AssessmentIcon />
+              </Avatar>
+              <Box>
+                <Typography variant="h4" fontWeight="bold" color="#0f172a">
+                  {stats.avgATSScore}%
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Avg ATS Score
+                </Typography>
               </Box>
             </Paper>
           </Grid>
-          
+
           <Grid item xs={12} sm={4}>
-            <Paper 
-              elevation={3}
-              sx={{ 
-                p: 3, 
-                background: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
-                color: 'white',
-                borderRadius: 2
+            <Paper
+              elevation={0}
+              sx={{
+                p: 3,
+                bgcolor: 'rgba(245, 158, 11, 0.03)',
+                border: '1px solid rgba(245, 158, 11, 0.1)',
+                borderRadius: 4,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 3
               }}
             >
-              <Box display="flex" alignItems="center" justifyContent="space-between">
-                <Box>
-                  <Typography variant="h4" fontWeight="bold">
-                    {stats.recentResumes}
-                  </Typography>
-                  <Typography variant="body2">
-                    This Week
-                  </Typography>
-                </Box>
-                <Avatar sx={{ bgcolor: 'rgba(255,255,255,0.2)', width: 56, height: 56 }}>
-                  <ScheduleIcon />
-                </Avatar>
+              <Avatar sx={{ bgcolor: 'rgba(59, 130, 246, 0.1)', color: '#3b82f6', width: 56, height: 56 }}>
+                <ScheduleIcon />
+              </Avatar>
+              <Box>
+                <Typography variant="h4" fontWeight="bold" color="#0f172a">
+                  {stats.recentResumes}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Added This Week
+                </Typography>
               </Box>
             </Paper>
           </Grid>
@@ -193,71 +197,80 @@ const Dashboard: React.FC = () => {
       )}
 
       {isError && (
-        <Alert severity="error" sx={{ mb: 3 }}>
+        <Alert severity="error" sx={{ mb: 3, borderRadius: 2 }}>
           {message}
         </Alert>
       )}
 
-      <Box sx={{ mb: 4 }}>
+      <Box sx={{ mb: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h5" fontWeight="bold">My Resumes</Typography>
         <Button
           variant="contained"
           size="large"
           startIcon={<UploadIcon />}
           onClick={() => navigate('/upload')}
-          sx={{ 
-            px: 4, 
-            py: 1.5,
-            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-            boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)'
+          sx={{
+            px: 4,
+            py: 1.2,
+            borderRadius: 50,
+            background: 'var(--primary-gradient)',
+            boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+            '&:hover': {
+              boxShadow: '0 6px 16px rgba(99, 102, 241, 0.4)',
+              transform: 'translateY(-1px)'
+            }
           }}
         >
-          Upload New Resume
+          Upload New
         </Button>
       </Box>
 
       {resumes.length === 0 ? (
         <Fade in timeout={1000}>
           <Paper
-            elevation={6}
+            elevation={0}
             sx={{
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
-              py: 8,
+              py: 12,
               px: 4,
-              borderRadius: 3,
-              background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+              borderRadius: 4,
+              bgcolor: 'white',
+              border: '1px solid rgba(0,0,0,0.05)',
             }}
           >
             <Avatar
               sx={{
-                bgcolor: 'primary.main',
-                width: 80,
-                height: 80,
-                mb: 3,
+                background: 'rgba(99, 102, 241, 0.1)',
+                color: 'primary.main',
+                width: 100,
+                height: 100,
+                mb: 4,
               }}
             >
-              <DescriptionIcon sx={{ fontSize: 40 }} />
+              <DescriptionIcon sx={{ fontSize: 48 }} />
             </Avatar>
-            <Typography variant="h5" color="text.primary" gutterBottom fontWeight="bold">
-              No resumes uploaded yet
+            <Typography variant="h4" color="text.primary" gutterBottom fontWeight="bold">
+              No resumes yet
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 4, textAlign: 'center' }}>
-              Upload your first resume to get started with AI-powered analysis and improve your job applications
+            <Typography variant="body1" color="text.secondary" sx={{ mb: 6, textAlign: 'center', maxWidth: 400 }}>
+              Upload your resume to get AI-powered insights and keyword analysis.
             </Typography>
             <Button
               variant="contained"
               size="large"
               startIcon={<UploadIcon />}
               onClick={() => navigate('/upload')}
-              sx={{ 
-                px: 4, 
+              sx={{
+                px: 6,
                 py: 1.5,
-                background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-                boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)'
+                borderRadius: 50,
+                background: 'var(--primary-gradient)',
+                boxShadow: '0 8px 16px rgba(99, 102, 241, 0.2)',
               }}
             >
-              Upload Resume
+              Get Started
             </Button>
           </Paper>
         </Fade>
@@ -266,107 +279,109 @@ const Dashboard: React.FC = () => {
           <Grid container spacing={3}>
             {resumes.map((resume, index) => (
               <Grid item xs={12} sm={6} md={4} key={resume._id}>
-                <Card 
-                  sx={{ 
-                    height: '100%', 
-                    display: 'flex', 
+                <Card
+                  elevation={0}
+                  sx={{
+                    height: '100%',
+                    display: 'flex',
                     flexDirection: 'column',
-                    borderRadius: 3,
-                    boxShadow: 3,
-                    transition: 'all 0.3s ease-in-out',
+                    borderRadius: 4,
+                    border: '1px solid rgba(0,0,0,0.05)',
+                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                     '&:hover': {
-                      transform: 'translateY(-8px)',
-                      boxShadow: 6,
+                      transform: 'translateY(-4px)',
+                      boxShadow: '0 12px 20px -10px rgba(0,0,0,0.1)',
+                      borderColor: 'primary.light',
                     },
                   }}
                 >
                   <CardContent sx={{ flexGrow: 1, p: 3 }}>
-                    <Box display="flex" alignItems="center" mb={2}>
-                      <Avatar sx={{ bgcolor: 'primary.main', mr: 2 }}>
-                        {resume.fileType === 'pdf' ? 'PDF' : 'DOC'}
+                    <Box display="flex" alignItems="center" mb={2.5}>
+                      <Avatar sx={{
+                        background: resume.fileType === 'pdf' ? 'rgba(239, 68, 68, 0.1)' : 'rgba(59, 130, 246, 0.1)',
+                        color: resume.fileType === 'pdf' ? '#ef4444' : '#3b82f6',
+                        fontWeight: 'bold',
+                        fontSize: '0.75rem',
+                        mr: 2
+                      }}>
+                        {resume.fileType.toUpperCase()}
                       </Avatar>
-                      <Box>
+                      <Box sx={{ overflow: 'hidden' }}>
                         <Typography variant="h6" component="h2" fontWeight="bold" noWrap>
                           {resume.originalName}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {resume.fileType.toUpperCase()}
+                        <Typography variant="caption" color="text.secondary">
+                          Ref: {resume._id.slice(-6).toUpperCase()}
                         </Typography>
                       </Box>
                     </Box>
-                    
-                    <Box display="flex" alignItems="center" mb={2}>
+
+                    <Box display="flex" alignItems="center" mb={3}>
                       <ScheduleIcon sx={{ fontSize: 16, mr: 1, color: 'text.secondary' }} />
                       <Typography variant="body2" color="text.secondary">
-                        {formatDate(resume.createdAt)}
+                        Uploaded {formatDate(resume.createdAt)}
                       </Typography>
                     </Box>
 
-                    <Box sx={{ mb: 2 }}>
-                      <Box display="flex" alignItems="center" mb={1}>
-                        {getATSScoreIcon(resume.analysis.ats_score)}
-                        <LinearProgress 
-                          variant="determinate" 
-                          value={resume.analysis.ats_score}
-                          sx={{ 
-                            ml: 1, 
-                            flex: 1,
-                            height: 8,
-                            borderRadius: 4,
-                            backgroundColor: 'grey.200',
-                            '& .MuiLinearProgress-bar': {
-                              borderRadius: 4,
-                              backgroundColor: resume.analysis.ats_score >= 80 ? 'success.main' : 
-                                             resume.analysis.ats_score >= 60 ? 'warning.main' : 'error.main'
-                            }
-                          }}
-                        />
-                        <Typography variant="body2" sx={{ ml: 1, fontWeight: 'bold' }}>
+                    <Box sx={{ mb: 3 }}>
+                      <Box display="flex" alignItems="center" justifyContent="space-between" mb={1}>
+                        <Typography variant="body2" fontWeight="600">ATS Score</Typography>
+                        <Typography variant="body2" fontWeight="bold" color={getATSScoreColor(resume.analysis.ats_score) + '.main'}>
                           {resume.analysis.ats_score}%
                         </Typography>
                       </Box>
+                      <LinearProgress
+                        variant="determinate"
+                        value={resume.analysis.ats_score}
+                        sx={{
+                          height: 6,
+                          borderRadius: 3,
+                          backgroundColor: 'rgba(0,0,0,0.04)',
+                          '& .MuiLinearProgress-bar': {
+                            borderRadius: 3,
+                            background: resume.analysis.ats_score >= 80 ? 'linear-gradient(90deg, #10b981, #34d399)' :
+                              resume.analysis.ats_score >= 60 ? 'linear-gradient(90deg, #f59e0b, #fbbf24)' :
+                                'linear-gradient(90deg, #ef4444, #f87171)'
+                          }
+                        }}
+                      />
                     </Box>
 
-                    <Box sx={{ mb: 2 }}>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        <Box display="flex" alignItems="center" mb={1}>
-                          <WorkIcon sx={{ fontSize: 16, mr: 1 }} />
-                          Skills: {resume.analysis.skills?.technical?.length || 0} technical, {resume.analysis.skills?.soft?.length || 0} soft
-                        </Box>
-                      </Typography>
-                    </Box>
-
-                    <Typography variant="body2" color="text.secondary" sx={{ 
-                      fontStyle: 'italic',
+                    <Typography variant="body2" color="text.secondary" sx={{
+                      lineHeight: 1.6,
                       display: '-webkit-box',
                       WebkitLineClamp: 2,
                       WebkitBoxOrient: 'vertical',
                       overflow: 'hidden',
+                      mb: 1
                     }}>
                       {resume.analysis.summary}
                     </Typography>
                   </CardContent>
-                  <CardActions sx={{ p: 2, pt: 0 }}>
-                    <Tooltip title="View detailed analysis">
-                      <Button
-                        size="small"
-                        variant="outlined"
-                        startIcon={<VisibilityIcon />}
-                        onClick={() => handleViewResume(resume._id)}
-                        sx={{ flex: 1 }}
-                      >
-                        View
-                      </Button>
-                    </Tooltip>
-                    <Tooltip title="Delete resume">
-                      <IconButton
-                        size="small"
-                        color="error"
-                        onClick={() => handleDeleteResume(resume._id)}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
+                  <CardActions sx={{ p: 2, pt: 0, gap: 1 }}>
+                    <Button
+                      fullWidth
+                      variant="outlined"
+                      size="small"
+                      startIcon={<VisibilityIcon />}
+                      onClick={() => handleViewResume(resume._id)}
+                      sx={{
+                        borderRadius: 2,
+                        textTransform: 'none',
+                        fontWeight: 600,
+                        borderColor: 'rgba(0,0,0,0.1)',
+                        color: '#1e293b'
+                      }}
+                    >
+                      View Report
+                    </Button>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleDeleteResume(resume._id)}
+                      sx={{ color: 'text.disabled', '&:hover': { color: 'error.main', bgcolor: 'rgba(239,68,68,0.05)' } }}
+                    >
+                      <DeleteIcon fontSize="small" />
+                    </IconButton>
                   </CardActions>
                 </Card>
               </Grid>

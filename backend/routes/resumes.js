@@ -7,6 +7,7 @@ const {
   getResumes,
   getResume,
   deleteResume,
+  improveResume,
 } = require('../controllers/resumeController');
 
 // All routes are protected and require authentication
@@ -14,6 +15,9 @@ router.use(protect);
 
 // Route for file upload and analysis
 router.post('/', upload.single('resume'), uploadResume);
+
+// Route for AI resume improvement
+router.post('/:id/improve', improveResume);
 
 // Get all resumes for the logged-in user
 router.get('/', getResumes);

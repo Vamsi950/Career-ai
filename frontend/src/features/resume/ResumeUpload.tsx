@@ -14,6 +14,8 @@ import {
   Chip,
   IconButton,
   Tooltip,
+  Grid,
+  TextField,
 } from '@mui/material';
 import {
   CloudUpload as UploadIcon,
@@ -29,11 +31,12 @@ import { uploadResume, reset } from './resumeSlice';
 
 const ResumeUpload: React.FC = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [jobDescription, setJobDescription] = useState('');
   const [dragActive, setDragActive] = useState(false);
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
 
-  const { isLoading, isSuccess, isError, message, uploadProgress } = useAppSelector(
+  const { resumes, isLoading, isSuccess, isError, message, uploadProgress } = useAppSelector(
     (state) => state.resume
   );
 
@@ -42,11 +45,11 @@ const ResumeUpload: React.FC = () => {
   }, [dispatch]);
 
   React.useEffect(() => {
-    if (isSuccess) {
-      navigate('/');
+    if (isSuccess && resumes.length > 0) {
+      navigate(`/resume/${resumes[0]._id}`);
       dispatch(reset());
     }
-  }, [isSuccess, navigate, dispatch]);
+  }, [isSuccess, resumes, navigate, dispatch]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -82,6 +85,7 @@ const ResumeUpload: React.FC = () => {
 
     const formData = new FormData();
     formData.append('resume', selectedFile);
+    formData.append('jobDescription', jobDescription);
 
     dispatch(uploadResume(formData));
   };
@@ -105,206 +109,230 @@ const ResumeUpload: React.FC = () => {
               </IconButton>
             </Tooltip>
             <Box>
-              <Typography variant="h3" component="h1" gutterBottom fontWeight="bold">
-                Upload Resume
+              <Typography variant="h3" component="h1" gutterBottom fontWeight="bold" sx={{ background: 'var(--primary-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+                Analyze Your Resume
               </Typography>
               <Typography variant="h6" color="text.secondary">
-                Upload your resume to get AI-powered analysis and feedback
+                Get AI-powered insights tailored to your Job Description
               </Typography>
             </Box>
           </Box>
 
           {isError && (
-            <Alert severity="error" sx={{ mb: 3 }}>
+            <Alert severity="error" sx={{ mb: 3, borderRadius: 3 }}>
               {message}
             </Alert>
           )}
 
-          <Paper
-            elevation={6}
-            sx={{
-              p: 4,
-              border: dragActive ? '3px dashed' : '3px solid',
-              borderColor: dragActive ? 'primary.main' : 'grey.300',
-              backgroundColor: dragActive 
-                ? 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)' 
-                : 'background.paper',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease-in-out',
-              borderRadius: 3,
-              '&:hover': {
-                borderColor: 'primary.main',
-                transform: 'translateY(-2px)',
-                boxShadow: 8,
-              },
-            }}
-            onDragEnter={handleDrag}
-            onDragLeave={handleDrag}
-            onDragOver={handleDrag}
-            onDrop={handleDrop}
-            onClick={() => document.getElementById('file-input')?.click()}
-          >
-            <input
-              id="file-input"
-              type="file"
-              accept=".pdf,.docx"
-              onChange={handleFileSelect}
-              style={{ display: 'none' }}
-            />
-            
-            <Box sx={{ textAlign: 'center', py: 6 }}>
-              <Avatar
+          <Grid container spacing={4}>
+            <Grid size={{ xs: 12, md: 7 }}>
+              <Paper
+                elevation={0}
                 sx={{
-                  bgcolor: dragActive ? 'primary.main' : 'grey.200',
-                  width: 80,
-                  height: 80,
-                  mx: 'auto',
-                  mb: 3,
-                  transition: 'all 0.3s ease-in-out',
+                  p: 6,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  border: dragActive ? '2px dashed #6366f1' : '2px dashed rgba(0,0,0,0.1)',
+                  backgroundColor: dragActive ? 'rgba(99, 102, 241, 0.05)' : 'rgba(99, 102, 241, 0.01)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  borderRadius: 6,
+                  '&:hover': {
+                    borderColor: 'primary.main',
+                    backgroundColor: 'rgba(99, 102, 241, 0.02)',
+                  },
+                }}
+                onDragEnter={handleDrag}
+                onDragLeave={handleDrag}
+                onDragOver={handleDrag}
+                onDrop={handleDrop}
+                onClick={() => document.getElementById('file-input')?.click()}
+              >
+                <input
+                  id="file-input"
+                  type="file"
+                  accept=".pdf,.docx"
+                  onChange={handleFileSelect}
+                  style={{ display: 'none' }}
+                />
+
+                <Box sx={{ textAlign: 'center' }}>
+                  <Avatar
+                    sx={{
+                      bgcolor: dragActive ? 'primary.main' : 'rgba(0,0,0,0.04)',
+                      color: dragActive ? 'white' : 'text.secondary',
+                      width: 100,
+                      height: 100,
+                      mx: 'auto',
+                      mb: 4,
+                      transition: 'all 0.3s ease',
+                    }}
+                  >
+                    <UploadIcon sx={{ fontSize: 48 }} />
+                  </Avatar>
+
+                  <Typography variant="h5" gutterBottom fontWeight="bold" color={dragActive ? 'primary.main' : 'text.primary'}>
+                    {dragActive ? 'Drop your file here' : 'Click or Drag Resume'}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary" sx={{ mb: 4 }}>
+                    Supports PDF and DOCX (Max 5MB)
+                  </Typography>
+
+                  {selectedFile && (
+                    <Fade in timeout={500}>
+                      <Box
+                        sx={{
+                          mt: 2,
+                          p: 2.5,
+                          backgroundColor: 'rgba(76, 175, 80, 0.05)',
+                          borderRadius: 3,
+                          border: '1px solid rgba(76, 175, 80, 0.2)',
+                          width: '100%',
+                          maxWidth: 350
+                        }}
+                      >
+                        <Box display="flex" alignItems="center" justifyContent="space-between">
+                          <Box display="flex" alignItems="center" gap={2}>
+                            <CheckCircleIcon color="success" />
+                            <Box sx={{ textAlign: 'left' }}>
+                              <Typography variant="body2" fontWeight="bold" noWrap sx={{ maxWidth: 200 }}>
+                                {selectedFile.name}
+                              </Typography>
+                              <Typography variant="caption" color="text.secondary">
+                                Ready for analysis
+                              </Typography>
+                            </Box>
+                          </Box>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedFile(null);
+                            }}
+                          >
+                            <CloseIcon fontSize="small" />
+                          </IconButton>
+                        </Box>
+                      </Box>
+                    </Fade>
+                  )}
+                </Box>
+              </Paper>
+            </Grid>
+
+            <Grid size={{ xs: 12, md: 5 }}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 4,
+                  height: '100%',
+                  borderRadius: 4,
+                  bgcolor: 'white',
+                  border: '1px solid rgba(0,0,0,0.05)',
+                  display: 'flex',
+                  flexDirection: 'column'
                 }}
               >
-                <UploadIcon sx={{ fontSize: 40, color: dragActive ? 'white' : 'text.secondary' }} />
-              </Avatar>
-              
-              <Typography variant="h5" gutterBottom fontWeight="bold" color={dragActive ? 'primary.main' : 'text.primary'}>
-                {dragActive ? 'Drop your file here' : 'Drag and drop your resume here'}
-              </Typography>
-              
-              <Typography variant="body1" color="text.secondary" gutterBottom>
-                or click to browse files
-              </Typography>
-              
-              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 2 }}>
-                <Chip 
-                  label="PDF" 
-                  size="small" 
-                  color="primary" 
-                  variant="outlined"
-                  icon={<DescriptionIcon />}
-                />
-                <Chip 
-                  label="DOCX" 
-                  size="small" 
-                  color="primary" 
-                  variant="outlined"
-                  icon={<DescriptionIcon />}
-                />
-                <Chip 
-                  label="Max 5MB" 
-                  size="small" 
-                  color="default" 
-                  variant="outlined"
-                />
-              </Box>
-            </Box>
-
-            {selectedFile && (
-              <Fade in timeout={500}>
-                <Box 
-                  sx={{ 
-                    mt: 3, 
-                    p: 3, 
-                    backgroundColor: 'success.light',
-                    borderRadius: 2,
-                    border: '2px solid',
-                    borderColor: 'success.main',
-                  }}
-                >
-                  <Box display="flex" alignItems="center" justifyContent="space-between">
-                    <Box display="flex" alignItems="center" gap={2}>
-                      <Avatar sx={{ bgcolor: 'success.main' }}>
-                        <CheckCircleIcon />
-                      </Avatar>
-                      <Box>
-                        <Typography variant="body1" fontWeight="bold">
-                          {selectedFile.name}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary">
-                          {formatFileSize(selectedFile.size)} • {selectedFile.type === 'application/pdf' ? 'PDF' : 'DOCX'}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    <IconButton 
-                      size="small" 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedFile(null);
-                      }}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                  </Box>
-                </Box>
-              </Fade>
-            )}
-          </Paper>
-
-          {isLoading && (
-            <Fade in timeout={500}>
-              <Paper elevation={3} sx={{ mt: 3, p: 3, borderRadius: 2 }}>
-                <Box display="flex" alignItems="center" gap={2} mb={2}>
-                  <SpeedIcon color="primary" />
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <DescriptionIcon color="primary" />
                   <Typography variant="h6" fontWeight="bold">
-                    Processing your resume...
+                    Job Description
                   </Typography>
                 </Box>
-                
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  {uploadProgress < 30 ? 'Uploading file...' : 
-                   uploadProgress < 60 ? 'Extracting text content...' :
-                   uploadProgress < 90 ? 'Analyzing with AI...' :
-                   'Generating insights...'}
+                <Typography variant="body2" color="text.secondary" paragraph>
+                  Paste the job description below for a targeted ATS score and tailored advice.
                 </Typography>
-                
-                <LinearProgress 
-                  variant="determinate" 
-                  value={uploadProgress}
-                  sx={{ 
-                    height: 8,
-                    borderRadius: 4,
-                    backgroundColor: 'grey.200',
-                    '& .MuiLinearProgress-bar': {
-                      borderRadius: 4,
-                      background: 'linear-gradient(90deg, #2196F3 0%, #21CBF3 100%)',
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={12}
+                  placeholder="Paste job description here..."
+                  variant="outlined"
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  sx={{
+                    flexGrow: 1,
+                    '& .MuiOutlinedInput-root': {
+                      backgroundColor: 'rgba(0,0,0,0.02)',
+                      borderRadius: 3,
+                      '& fieldset': { borderColor: 'transparent' },
+                      '&:hover fieldset': { borderColor: 'rgba(0,0,0,0.05)' },
+                      '&.Mui-focused fieldset': { borderColor: 'primary.main' },
                     }
                   }}
                 />
-                
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
-                  {uploadProgress}% complete
+              </Paper>
+            </Grid>
+          </Grid>
+
+          {isLoading && (
+            <Fade in timeout={500}>
+              <Paper elevation={3} sx={{ mt: 4, p: 3, borderRadius: 3, borderLeft: '6px solid', borderColor: 'primary.main' }}>
+                <Box display="flex" alignItems="center" gap={2} mb={2}>
+                  <SpeedIcon color="primary" />
+                  <Typography variant="h6" fontWeight="bold">
+                    Analyzing your profile...
+                  </Typography>
+                </Box>
+
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  {uploadProgress < 30 ? 'Uploading files...' :
+                    uploadProgress < 60 ? 'Extracting text...' :
+                      uploadProgress < 90 ? 'Comparing with Job Description...' :
+                        'Finalizing ATS Score...'}
                 </Typography>
+
+                <LinearProgress
+                  variant="determinate"
+                  value={uploadProgress}
+                  sx={{
+                    height: 10,
+                    borderRadius: 5,
+                    backgroundColor: 'grey.100',
+                    '& .MuiLinearProgress-bar': {
+                      borderRadius: 5,
+                      background: 'var(--primary-gradient)',
+                    }
+                  }}
+                />
               </Paper>
             </Fade>
           )}
 
-          <Box sx={{ mt: 4, display: 'flex', gap: 2, justifyContent: 'center' }}>
+          <Box sx={{ mt: 6, display: 'flex', justifyContent: 'center', gap: 2 }}>
+            <Button
+              variant="text"
+              size="large"
+              onClick={() => navigate('/')}
+              sx={{ px: 4, borderRadius: 50, color: 'text.secondary' }}
+            >
+              Cancel
+            </Button>
             <Button
               variant="contained"
               size="large"
               disabled={!selectedFile || isLoading}
               onClick={handleUpload}
-              startIcon={isLoading ? <CircularProgress size={24} /> : <AssessmentIcon />}
-              sx={{ 
-                px: 4, 
+              sx={{
+                px: 6,
                 py: 1.5,
-                background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-                boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)',
+                borderRadius: 50,
+                background: 'var(--primary-gradient)',
+                boxShadow: '0 8px 16px rgba(99, 102, 241, 0.2)',
+                fontWeight: 'bold',
                 '&:disabled': {
-                  background: 'grey.300',
+                  background: 'rgba(0,0,0,0.1)',
+                },
+                '&:hover': {
+                  transform: 'translateY(-1px)',
+                  boxShadow: '0 10px 20px rgba(99, 102, 241, 0.3)',
                 }
               }}
             >
-              {isLoading ? 'Processing...' : 'Upload & Analyze'}
-            </Button>
-            
-            <Button
-              variant="outlined"
-              size="large"
-              onClick={() => navigate('/')}
-              disabled={isLoading}
-              sx={{ px: 4, py: 1.5 }}
-            >
-              Cancel
+              {isLoading ? 'Analyzing...' : 'Analyze Resume'}
             </Button>
           </Box>
         </Box>
